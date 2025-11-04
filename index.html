@@ -1,53 +1,237 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>xsukax JS CAPTCHA Demo</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="xsukax JS CAPTCHA - Lightweight, privacy-focused CAPTCHA solution with zero dependencies">
+  <title>xsukax JS CAPTCHA - Demo</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* small extra polish to match GitHub's light aesthetic */
-    :root{
-      --muted:#6b7280;
-      --card:#ffffff;
-      --bg:#f6f8fa;
-      --accent:#0969da; /* GitHub blue */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    
+    * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    
+    .gradient-bg {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
-    html,body{height:100%;}
+    
+    .github-shadow {
+      box-shadow: 0 1px 3px rgba(27, 31, 35, 0.12), 0 8px 24px rgba(66, 74, 83, 0.12);
+    }
+    
+    .code-block {
+      background: #f6f8fa;
+      border: 1px solid #d0d7de;
+      border-radius: 6px;
+      padding: 16px;
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      overflow-x: auto;
+    }
   </style>
 </head>
-<body class="antialiased bg-[color:var(--bg)] flex items-center justify-center min-h-screen font-sans text-slate-900">
-  <main class="w-full max-w-md p-6">
-    <section class="bg-[color:var(--card)] border border-slate-200 rounded-2xl shadow-sm p-6">
-      <header class="mb-6 flex items-center gap-3">
-        <div>
-          <h1 class="text-lg font-semibold">xsukax JS CAPTCHA Demo</h1>
-        </div>
-      </header>
+<body class="bg-gray-50 text-gray-900 antialiased">
 
-      <form action="index.html" method="post" class="space-y-4" novalidate>
+  <header class="bg-white border-b border-gray-200">
+    <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+        </div>
         <div>
-          <label for="name" class="block text-sm font-medium text-slate-700 mb-1">Name</label>
-          <input id="name" name="name" type="text" required placeholder="Your full name"
-            class="block w-full rounded-md border border-slate-200 bg-white px-3 py-2 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[color:var(--accent)] focus:border-[color:var(--accent)] transition" />
+          <h1 class="text-xl font-bold text-gray-900">xsukax CAPTCHA</h1>
+          <p class="text-xs text-gray-500">Privacy-Focused Bot Protection</p>
+        </div>
+      </div>
+      <a href="https://github.com/xsukax/xsukax-JS-CAPTCHA" target="_blank" class="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition text-sm font-medium">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/>
+        </svg>
+        View on GitHub
+      </a>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 py-12">
+    
+    <section class="text-center mb-16">
+      <div class="inline-flex items-center gap-2 px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-sm font-medium mb-4">
+        <span class="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></span>
+        No tracking • No dependencies • Privacy-first
+      </div>
+      <h2 class="text-4xl font-bold text-gray-900 mb-4">Secure CAPTCHA for Modern Web</h2>
+      <p class="text-lg text-gray-600 max-w-2xl mx-auto">Lightweight JavaScript CAPTCHA that protects your forms without compromising user privacy or requiring external services.</p>
+    </section>
+
+    <div class="grid md:grid-cols-3 gap-6 mb-16">
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+          <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+        </div>
+        <h3 class="font-semibold text-gray-900 mb-2">Privacy-Focused</h3>
+        <p class="text-sm text-gray-600">Zero data collection. No external requests. All processing happens locally in the browser.</p>
+      </div>
+
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+        </div>
+        <h3 class="font-semibold text-gray-900 mb-2">Lightweight</h3>
+        <p class="text-sm text-gray-600">Under 25KB total. Zero dependencies. Fast initialization and minimal performance impact.</p>
+      </div>
+
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+          <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+          </svg>
+        </div>
+        <h3 class="font-semibold text-gray-900 mb-2">Easy Integration</h3>
+        <p class="text-sm text-gray-600">One script tag and one div element. Auto-initializes and integrates with any form.</p>
+      </div>
+    </div>
+
+    <section class="bg-white rounded-lg border border-gray-200 p-8 github-shadow mb-16">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-2xl font-bold text-gray-900">Live Demo</h3>
+        <span class="text-sm text-gray-500">Try it yourself</span>
+      </div>
+
+      <form action="#" method="post" class="max-w-md mx-auto">
+        <div class="mb-4">
+          <label for="demo-name" class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+          <input id="demo-name" name="name" type="text" required placeholder="John Doe" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition">
         </div>
 
-        <div>
-          <label for="email" class="block text-sm font-medium text-slate-700 mb-1">Email</label>
-          <input id="email" name="email" type="email" required placeholder="you@example.com"
-            class="block w-full rounded-md border border-slate-200 bg-white px-3 py-2 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[color:var(--accent)] focus:border-[color:var(--accent)] transition" />
+        <div class="mb-4">
+          <label for="demo-email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+          <input id="demo-email" name="email" type="email" required placeholder="john@example.com" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition">
         </div>
-		<div class="xsukax-captcha"></div>
 
-        <div class="pt-2">
-          <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 font-medium shadow-sm text-white bg-[color:var(--accent)] hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[color:var(--accent)]">Submit</button>
+        <div class="mb-4">
+          <label for="demo-message" class="block text-sm font-medium text-gray-700 mb-2">Message</label>
+          <textarea id="demo-message" name="message" rows="3" required placeholder="Your message here..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition resize-none"></textarea>
         </div>
+
+        <div class="xsukax-captcha"></div>
+
+        <button type="submit" class="w-full bg-gray-900 text-white py-2.5 rounded-md hover:bg-gray-800 transition font-medium">
+          Submit Form
+        </button>
       </form>
+    </section>
 
-      <footer class="mt-4 text-xs text-[color:var(--muted)]">By submitting, you agree to our terms.</footer>
+    <section class="mb-16">
+      <h3 class="text-2xl font-bold text-gray-900 mb-6">Quick Start</h3>
+      
+      <div class="bg-white rounded-lg border border-gray-200 p-6 mb-4">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-sm font-medium text-gray-700">Step 1: Include Script</span>
+          <button onclick="navigator.clipboard.writeText(this.parentElement.nextElementSibling.textContent.trim())" class="text-xs text-purple-600 hover:text-purple-700 font-medium">Copy</button>
+        </div>
+        <div class="code-block">&lt;script src="https://xsukax.github.io/xsukax-JS-CAPTCHA/captcha.js"&gt;&lt;/script&gt;</div>
+      </div>
+
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-sm font-medium text-gray-700">Step 2: Add Container</span>
+          <button onclick="navigator.clipboard.writeText(this.parentElement.nextElementSibling.textContent.trim())" class="text-xs text-purple-600 hover:text-purple-700 font-medium">Copy</button>
+        </div>
+        <div class="code-block">&lt;div class="xsukax-captcha"&gt;&lt;/div&gt;</div>
+      </div>
+    </section>
+
+    <section class="grid md:grid-cols-2 gap-6 mb-16">
+      <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg border border-purple-200 p-6">
+        <h4 class="font-semibold text-gray-900 mb-3">Features</h4>
+        <ul class="space-y-2 text-sm text-gray-700">
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            <span>Canvas-based text distortion</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            <span>Automatic form integration</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            <span>Time-based challenge expiration</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            <span>Multiple attempts handling</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            <span>Mobile responsive design</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg border border-green-200 p-6">
+        <h4 class="font-semibold text-gray-900 mb-3">Security Benefits</h4>
+        <ul class="space-y-2 text-sm text-gray-700">
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            <span>No third-party dependencies</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            <span>Client-side only processing</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            <span>Cryptographic token generation</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            <span>Advanced visual obfuscation</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            <span>Form submission protection</span>
+          </li>
+        </ul>
+      </div>
     </section>
 
   </main>
+
+  <footer class="bg-white border-t border-gray-200 py-8 mt-16">
+    <div class="max-w-5xl mx-auto px-4 text-center">
+      <p class="text-sm text-gray-600 mb-2">
+        Open Source • GPLv3 Licensed • Built with Privacy in Mind
+      </p>
+      <div class="flex items-center justify-center gap-6 text-sm">
+        <a href="https://github.com/xsukax/xsukax-JS-CAPTCHA" class="text-purple-600 hover:text-purple-700 font-medium">Documentation</a>
+        <span class="text-gray-300">•</span>
+        <a href="https://github.com/xsukax/xsukax-JS-CAPTCHA/issues" class="text-purple-600 hover:text-purple-700 font-medium">Report Issue</a>
+        <span class="text-gray-300">•</span>
+        <a href="https://github.com/xsukax" class="text-purple-600 hover:text-purple-700 font-medium">@xsukax</a>
+      </div>
+    </div>
+  </footer>
+
   <script src="https://xsukax.github.io/xsukax-JS-CAPTCHA/captcha.js"></script>
+  
+  <script>
+    document.querySelector('form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const verified = window.xsukaxCAPTCHA.isVerified(document.querySelector('.xsukax-captcha').id);
+      if (verified) {
+        alert('✓ Form submitted successfully! (Demo mode - no data sent)');
+        this.reset();
+        window.xsukaxCAPTCHA.resetAll();
+      }
+    });
+  </script>
+
 </body>
 </html>
