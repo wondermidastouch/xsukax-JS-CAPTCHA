@@ -1,24 +1,23 @@
 /**
- * xsukax CAPTCHA v1.0
- * A secure, text-based CAPTCHA solution for bot protection
- * Features: Canvas-based text challenges, automatic initialization, no external dependencies
- * Usage: <script src="xsukax-captcha.js"></script>
+ * xsukax CAPTCHA v2.0
+ * Enhanced secure CAPTCHA with advanced bot protection
+ * Usage: <script src="captcha.js"></script>
  *        <div class="xsukax-captcha"></div>
  */
 
 (function(global) {
     'use strict';
     
-    // Configuration
     const CONFIG = {
-        canvasWidth: 280,
-        canvasHeight: 80,
+        canvasWidth: 300,
+        canvasHeight: 100,
         codeLength: 6,
-        challengeTimeout: 120000, // 2 minutes
+        challengeTimeout: 180000,
         maxAttempts: 3,
         tokenLength: 32,
-        fonts: ['Arial', 'Helvetica', 'sans-serif'],
-        characters: 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', // Uppercase only, no ambiguous characters
+        minInteractionTime: 800,
+        fonts: ['Arial', 'Courier New', 'Georgia', 'Times New Roman', 'Verdana'],
+        characters: 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789',
         colors: {
             primary: '#2c3e50',
             secondary: '#3498db',
@@ -31,15 +30,10 @@
         }
     };
 
-    // Global object for CAPTCHA
-    global.xsukaxCAPTCHA = {
-        version: '1.0.0'
-    };
-
-    // Store all CAPTCHA instances
+    global.xsukaxCAPTCHA = { version: '2.0.0' };
     const captchaInstances = new Map();
+    const interactionLog = new WeakMap();
 
-    // Auto-initialize when DOM is ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', autoInitialize);
     } else {
@@ -54,7 +48,6 @@
             }
             initializeCaptcha(element);
         });
-
         attachToForms();
     }
 
@@ -66,216 +59,42 @@
                 id: container.id,
                 currentToken: generateToken(),
                 currentCode: null,
+                canvasFingerprint: null,
                 attempts: 0,
                 verified: false,
                 startTime: Date.now(),
-                container: container
+                firstInteractionTime: null,
+                mouseMovements: [],
+                keystrokes: [],
+                container: container,
+                challengeType: Math.random() > 0.5 ? 'distorted' : 'math'
             };
 
             captchaInstances.set(container.id, instanceState);
+            interactionLog.set(container, []);
             
-            const wrapper = document.createElement('div');
-            wrapper.className = 'xsukax-captcha-wrapper';
-            wrapper.style.cssText = `
-                border: 1px solid ${CONFIG.colors.border};
-                border-radius: 6px;
-                padding: 16px;
-                background: ${CONFIG.colors.background};
-                font-family: ${CONFIG.fonts.join(', ')};
-                max-width: ${CONFIG.canvasWidth + 32}px;
-                margin: 12px 0;
-                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            `;
+            const wrapper = createWrapper();
+            const header = createHeader(container.id);
+            const canvasContainer = createCanvasContainer(instanceState);
+            const inputGroup = createInputGroup(instanceState);
+            const status = createStatus();
+            const footer = createFooter();
 
-            // Header with title and refresh button
-            const header = document.createElement('div');
-            header.style.cssText = `
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 12px;
-            `;
-            
-            const title = document.createElement('div');
-            title.textContent = 'Security Check';
-            title.style.cssText = `
-                font-weight: 600;
-                color: ${CONFIG.colors.text};
-                font-size: 14px;
-            `;
-            
-            const refreshBtn = document.createElement('button');
-            refreshBtn.innerHTML = '↻';
-            refreshBtn.title = 'Refresh CAPTCHA';
-            refreshBtn.type = 'button';
-            refreshBtn.style.cssText = `
-                background: transparent;
-                color: ${CONFIG.colors.primary};
-                border: 1px solid ${CONFIG.colors.border};
-                border-radius: 4px;
-                width: 28px;
-                height: 28px;
-                cursor: pointer;
-                font-size: 14px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                transition: all 0.2s;
-            `;
-            refreshBtn.addEventListener('mouseenter', function() {
-                this.style.background = CONFIG.colors.primary;
-                this.style.color = 'white';
-            });
-            refreshBtn.addEventListener('mouseleave', function() {
-                this.style.background = 'transparent';
-                this.style.color = CONFIG.colors.primary;
-            });
-            refreshBtn.addEventListener('click', function() {
-                resetCaptcha(container.id);
-            });
-            
-            header.appendChild(title);
-            header.appendChild(refreshBtn);
             wrapper.appendChild(header);
-
-            // Canvas container
-            const canvasContainer = document.createElement('div');
-            canvasContainer.style.cssText = `
-                margin-bottom: 12px;
-                position: relative;
-            `;
-            
-            const canvas = document.createElement('canvas');
-            canvas.width = CONFIG.canvasWidth;
-            canvas.height = CONFIG.canvasHeight;
-            canvas.style.cssText = `
-                border: 1px solid ${CONFIG.colors.border};
-                border-radius: 4px;
-                background: white;
-                display: block;
-                cursor: pointer;
-                width: 100%;
-                height: auto;
-            `;
-            
-            canvasContainer.appendChild(canvas);
             wrapper.appendChild(canvasContainer);
-
-            // Input group
-            const inputGroup = document.createElement('div');
-            inputGroup.style.cssText = `
-                display: flex;
-                gap: 8px;
-                margin-bottom: 12px;
-                align-items: stretch;
-            `;
-            
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.placeholder = 'Enter code';
-            input.style.cssText = `
-                flex: 1;
-                padding: 8px 12px;
-                border: 1px solid ${CONFIG.colors.border};
-                border-radius: 4px;
-                font-family: ${CONFIG.fonts.join(', ')};
-                font-size: 14px;
-                transition: border-color 0.2s;
-                text-transform: uppercase;
-            `;
-            
-            // Auto-uppercase input
-            input.addEventListener('input', function() {
-                this.value = this.value.toUpperCase();
-            });
-            
-            input.addEventListener('focus', function() {
-                this.style.borderColor = CONFIG.colors.primary;
-                this.style.outline = 'none';
-            });
-            input.addEventListener('blur', function() {
-                this.style.borderColor = CONFIG.colors.border;
-            });
-            
-            const verifyBtn = document.createElement('button');
-            verifyBtn.textContent = 'Verify';
-            verifyBtn.type = 'button';
-            verifyBtn.style.cssText = `
-                background: ${CONFIG.colors.primary};
-                color: white;
-                border: none;
-                border-radius: 4px;
-                padding: 0 16px;
-                cursor: pointer;
-                font-family: ${CONFIG.fonts.join(', ')};
-                font-size: 14px;
-                font-weight: 500;
-                transition: background-color 0.2s;
-                min-width: 80px;
-            `;
-            verifyBtn.addEventListener('mouseenter', function() {
-                if (!this.disabled) {
-                    this.style.background = '#1a2530';
-                }
-            });
-            verifyBtn.addEventListener('mouseleave', function() {
-                if (!this.disabled) {
-                    this.style.background = CONFIG.colors.primary;
-                }
-            });
-            
-            inputGroup.appendChild(input);
-            inputGroup.appendChild(verifyBtn);
             wrapper.appendChild(inputGroup);
-
-            // Status message area
-            const status = document.createElement('div');
-            status.className = 'xsukax-captcha-status';
-            status.style.cssText = `
-                min-height: 18px;
-                margin-bottom: 8px;
-                font-size: 13px;
-                line-height: 1.4;
-            `;
             wrapper.appendChild(status);
-
-            // Brand footer - updated to remove italic and make brand bold
-            const footer = document.createElement('div');
-            footer.style.cssText = `
-                text-align: right;
-                font-size: 11px;
-                color: ${CONFIG.colors.lightText};
-                border-top: 1px solid ${CONFIG.colors.border};
-                padding-top: 8px;
-            `;
-            footer.innerHTML = 'Protected by <strong>xsukax CAPTCHA</strong>';
             wrapper.appendChild(footer);
-
             container.appendChild(wrapper);
 
-            // Store references
-            instanceState.canvas = canvas;
-            instanceState.ctx = canvas.getContext('2d');
-            instanceState.input = input;
-            instanceState.verifyBtn = verifyBtn;
+            instanceState.canvas = canvasContainer.querySelector('canvas');
+            instanceState.ctx = instanceState.canvas.getContext('2d');
+            instanceState.input = inputGroup.querySelector('input');
+            instanceState.verifyBtn = inputGroup.querySelector('button');
             instanceState.status = status;
 
-            generateTextCaptcha(instanceState);
-
-            // Event listeners
-            verifyBtn.addEventListener('click', function() {
-                verifyCaptcha(instanceState);
-            });
-
-            input.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    verifyCaptcha(instanceState);
-                }
-            });
-
-            canvas.addEventListener('click', function() {
-                resetCaptcha(container.id);
-            });
+            generateChallenge(instanceState);
+            attachBehaviorTracking(instanceState);
 
         } catch (error) {
             console.error('xsukax CAPTCHA initialization error:', error);
@@ -288,14 +107,172 @@
         }
     }
 
-    function generateTextCaptcha(instanceState) {
-        const { ctx, canvas, status } = instanceState;
-        const width = canvas.width;
-        const height = canvas.height;
+    function createWrapper() {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'xsukax-captcha-wrapper';
+        wrapper.style.cssText = `
+            border: 1px solid ${CONFIG.colors.border};
+            border-radius: 6px;
+            padding: 16px;
+            background: ${CONFIG.colors.background};
+            font-family: ${CONFIG.fonts[0]}, sans-serif;
+            max-width: ${CONFIG.canvasWidth + 32}px;
+            margin: 12px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        `;
+        return wrapper;
+    }
+
+    function createHeader(instanceId) {
+        const header = document.createElement('div');
+        header.style.cssText = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;';
         
-        ctx.clearRect(0, 0, width, height);
+        const title = document.createElement('div');
+        title.textContent = 'Security Verification';
+        title.style.cssText = `font-weight: 600; color: ${CONFIG.colors.text}; font-size: 14px;`;
         
-        // Generate uppercase code only
+        const refreshBtn = document.createElement('button');
+        refreshBtn.innerHTML = '↻';
+        refreshBtn.title = 'New Challenge';
+        refreshBtn.type = 'button';
+        refreshBtn.style.cssText = `
+            background: transparent;
+            color: ${CONFIG.colors.primary};
+            border: 1px solid ${CONFIG.colors.border};
+            border-radius: 4px;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        `;
+        refreshBtn.onmouseenter = function() {
+            this.style.background = CONFIG.colors.primary;
+            this.style.color = 'white';
+        };
+        refreshBtn.onmouseleave = function() {
+            this.style.background = 'transparent';
+            this.style.color = CONFIG.colors.primary;
+        };
+        refreshBtn.onclick = () => resetCaptcha(instanceId);
+        
+        header.appendChild(title);
+        header.appendChild(refreshBtn);
+        return header;
+    }
+
+    function createCanvasContainer(instanceState) {
+        const container = document.createElement('div');
+        container.style.cssText = 'margin-bottom: 12px; position: relative; user-select: none;';
+        
+        const canvas = document.createElement('canvas');
+        canvas.width = CONFIG.canvasWidth;
+        canvas.height = CONFIG.canvasHeight;
+        canvas.style.cssText = `
+            border: 1px solid ${CONFIG.colors.border};
+            border-radius: 4px;
+            background: white;
+            display: block;
+            cursor: pointer;
+            width: 100%;
+            height: auto;
+        `;
+        canvas.onclick = () => resetCaptcha(instanceState.id);
+        
+        container.appendChild(canvas);
+        return container;
+    }
+
+    function createInputGroup(instanceState) {
+        const group = document.createElement('div');
+        group.style.cssText = 'display: flex; gap: 8px; margin-bottom: 12px; align-items: stretch;';
+        
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.placeholder = 'Enter the code';
+        input.autocomplete = 'off';
+        input.spellcheck = false;
+        input.style.cssText = `
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid ${CONFIG.colors.border};
+            border-radius: 4px;
+            font-family: ${CONFIG.fonts[0]}, monospace;
+            font-size: 14px;
+            transition: border-color 0.2s;
+            text-transform: uppercase;
+        `;
+        
+        input.oninput = function() {
+            this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        };
+        input.onfocus = function() {
+            this.style.borderColor = CONFIG.colors.primary;
+            this.style.outline = 'none';
+        };
+        input.onblur = function() {
+            this.style.borderColor = CONFIG.colors.border;
+        };
+        input.onkeypress = (e) => {
+            if (e.key === 'Enter') verifyCaptcha(instanceState);
+        };
+        
+        const verifyBtn = document.createElement('button');
+        verifyBtn.textContent = 'Verify';
+        verifyBtn.type = 'button';
+        verifyBtn.style.cssText = `
+            background: ${CONFIG.colors.primary};
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0 20px;
+            cursor: pointer;
+            font-family: ${CONFIG.fonts[0]}, sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+            min-width: 80px;
+        `;
+        verifyBtn.onmouseenter = function() {
+            if (!this.disabled) this.style.background = '#1a2530';
+        };
+        verifyBtn.onmouseleave = function() {
+            if (!this.disabled) this.style.background = CONFIG.colors.primary;
+        };
+        verifyBtn.onclick = () => verifyCaptcha(instanceState);
+        
+        group.appendChild(input);
+        group.appendChild(verifyBtn);
+        return group;
+    }
+
+    function createStatus() {
+        const status = document.createElement('div');
+        status.className = 'xsukax-captcha-status';
+        status.style.cssText = 'min-height: 18px; margin-bottom: 8px; font-size: 13px; line-height: 1.4;';
+        return status;
+    }
+
+    function createFooter() {
+        const footer = document.createElement('div');
+        footer.style.cssText = `
+            text-align: right;
+            font-size: 11px;
+            color: ${CONFIG.colors.lightText};
+            border-top: 1px solid ${CONFIG.colors.border};
+            padding-top: 8px;
+        `;
+        footer.innerHTML = 'Protected by <strong>xsukax CAPTCHA</strong>';
+        return footer;
+    }
+
+    function generateChallenge(instanceState) {
+        const { ctx, canvas } = instanceState;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
         instanceState.currentCode = '';
         for (let i = 0; i < CONFIG.codeLength; i++) {
             instanceState.currentCode += CONFIG.characters.charAt(
@@ -303,108 +280,180 @@
             );
         }
 
-        drawBackground(ctx, width, height);
-        drawTextWithEffects(ctx, instanceState.currentCode, width, height);
-        addNoise(ctx, width, height);
+        drawComplexBackground(ctx, canvas.width, canvas.height);
+        drawDistortedText(ctx, instanceState.currentCode, canvas.width, canvas.height);
+        addAdvancedNoise(ctx, canvas.width, canvas.height);
+        addWaveDistortion(ctx, canvas.width, canvas.height);
         
-        status.textContent = 'Please enter the characters shown in the image';
-        status.style.color = CONFIG.colors.lightText;
+        instanceState.canvasFingerprint = generateCanvasFingerprint(ctx, canvas);
+        
+        showStatus(instanceState, 'Type the characters shown above', 'info');
     }
 
-    function drawBackground(ctx, width, height) {
-        const gradient = ctx.createLinearGradient(0, 0, width, height);
+    function drawComplexBackground(ctx, width, height) {
+        const gradient = ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, width);
         gradient.addColorStop(0, '#ffffff');
-        gradient.addColorStop(1, '#f8f9fa');
+        gradient.addColorStop(0.5, '#f8f9fa');
+        gradient.addColorStop(1, '#e9ecef');
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, width, height);
         
-        ctx.strokeStyle = 'rgba(0, 0, 0, 0.03)';
-        ctx.lineWidth = 1;
-        
-        for (let x = 0; x < width; x += 15) {
+        for (let i = 0; i < 15; i++) {
+            ctx.strokeStyle = `rgba(${Math.random()*50}, ${Math.random()*50}, ${Math.random()*50}, 0.05)`;
+            ctx.lineWidth = Math.random() * 2;
             ctx.beginPath();
-            ctx.moveTo(x, 0);
-            ctx.lineTo(x, height);
+            ctx.moveTo(Math.random() * width, Math.random() * height);
+            ctx.quadraticCurveTo(
+                Math.random() * width, Math.random() * height,
+                Math.random() * width, Math.random() * height
+            );
             ctx.stroke();
         }
     }
 
-    function drawTextWithEffects(ctx, text, width, height) {
-        const fontSize = Math.min(36, Math.floor(height * 0.6));
-        ctx.font = `bold ${fontSize}px ${CONFIG.fonts.join(', ')}`;
-        ctx.textAlign = 'center';
+    function drawDistortedText(ctx, text, width, height) {
+        const fontSize = 42;
+        const fontFamily = CONFIG.fonts[Math.floor(Math.random() * CONFIG.fonts.length)];
+        ctx.font = `bold ${fontSize}px ${fontFamily}`;
         ctx.textBaseline = 'middle';
         
-        const textWidth = ctx.measureText(text).width;
-        const letterSpacing = 8;
-        const totalWidth = textWidth + (letterSpacing * (text.length - 1));
+        const letterSpacing = 10;
+        const totalWidth = text.length * (fontSize * 0.6 + letterSpacing);
         const startX = (width - totalWidth) / 2;
         
         for (let i = 0; i < text.length; i++) {
             const char = text[i];
-            const x = startX + (ctx.measureText(text.substring(0, i)).width) + (i * letterSpacing) + (ctx.measureText(char).width / 2);
-            const y = height / 2 + (Math.random() - 0.5) * 8;
+            const x = startX + (i * (fontSize * 0.6 + letterSpacing)) + fontSize * 0.3;
+            const y = height / 2 + (Math.sin(i * 0.8) * 10);
             
-            const rotation = (Math.random() - 0.5) * 0.3;
-            const hue = Math.floor(Math.random() * 60) + 200;
-            ctx.fillStyle = `hsl(${hue}, 70%, 35%)`;
+            const rotation = (Math.random() - 0.5) * 0.4;
+            const scale = 0.9 + Math.random() * 0.2;
+            const hue = 200 + Math.random() * 60;
+            const saturation = 60 + Math.random() * 20;
+            const lightness = 25 + Math.random() * 15;
             
             ctx.save();
             ctx.translate(x, y);
             ctx.rotate(rotation);
+            ctx.scale(scale, scale);
             
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
-            ctx.shadowBlur = 1;
+            ctx.fillStyle = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+            ctx.shadowBlur = 2;
             ctx.shadowOffsetX = 1;
             ctx.shadowOffsetY = 1;
             
             ctx.fillText(char, 0, 0);
+            
+            ctx.strokeStyle = `hsl(${hue}, ${saturation}%, ${lightness - 10}%)`;
+            ctx.lineWidth = 0.5;
+            ctx.strokeText(char, 0, 0);
+            
             ctx.restore();
         }
     }
 
-    function addNoise(ctx, width, height) {
-        const dotCount = width * height * 0.005;
-        for (let i = 0; i < dotCount; i++) {
-            const x = Math.floor(Math.random() * width);
-            const y = Math.floor(Math.random() * height);
-            const size = Math.random() * 1.5;
-            const alpha = Math.random() * 0.2;
-            
-            ctx.fillStyle = `rgba(0, 0, 0, ${alpha})`;
-            ctx.fillRect(x, y, size, size);
+    function addAdvancedNoise(ctx, width, height) {
+        const imageData = ctx.getImageData(0, 0, width, height);
+        const data = imageData.data;
+        
+        for (let i = 0; i < data.length; i += 4) {
+            if (Math.random() < 0.02) {
+                const noise = (Math.random() - 0.5) * 50;
+                data[i] += noise;
+                data[i + 1] += noise;
+                data[i + 2] += noise;
+            }
         }
         
-        const lineCount = 3;
-        for (let i = 0; i < lineCount; i++) {
-            const x1 = Math.floor(Math.random() * width);
-            const y1 = Math.floor(Math.random() * height);
-            const x2 = x1 + Math.floor(Math.random() * 20) - 10;
-            const y2 = y1 + Math.floor(Math.random() * 20) - 10;
-            const lineWidth = Math.random() * 1;
-            const alpha = Math.random() * 0.1;
-            
-            ctx.strokeStyle = `rgba(0, 0, 0, ${alpha})`;
-            ctx.lineWidth = lineWidth;
+        ctx.putImageData(imageData, 0, 0);
+        
+        for (let i = 0; i < 8; i++) {
+            ctx.strokeStyle = `rgba(${Math.random()*100}, ${Math.random()*100}, ${Math.random()*100}, 0.15)`;
+            ctx.lineWidth = Math.random() * 2 + 1;
             ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
+            ctx.moveTo(Math.random() * width, Math.random() * height);
+            ctx.lineTo(Math.random() * width, Math.random() * height);
             ctx.stroke();
         }
     }
 
+    function addWaveDistortion(ctx, width, height) {
+        const imageData = ctx.getImageData(0, 0, width, height);
+        const pixels = imageData.data;
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = width;
+        tempCanvas.height = height;
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCtx.putImageData(imageData, 0, 0);
+        
+        ctx.clearRect(0, 0, width, height);
+        
+        for (let y = 0; y < height; y++) {
+            const offset = Math.sin(y / 8) * 3;
+            ctx.drawImage(tempCanvas, 0, y, width, 1, offset, y, width, 1);
+        }
+    }
+
+    function generateCanvasFingerprint(ctx, canvas) {
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        let hash = 0;
+        for (let i = 0; i < imageData.data.length; i += 100) {
+            hash = ((hash << 5) - hash) + imageData.data[i];
+            hash = hash & hash;
+        }
+        return hash.toString(16);
+    }
+
+    function attachBehaviorTracking(instanceState) {
+        const { input, canvas } = instanceState;
+        
+        const trackMouse = (e) => {
+            if (!instanceState.firstInteractionTime) {
+                instanceState.firstInteractionTime = Date.now();
+            }
+            instanceState.mouseMovements.push({
+                x: e.clientX,
+                y: e.clientY,
+                t: Date.now()
+            });
+            if (instanceState.mouseMovements.length > 50) {
+                instanceState.mouseMovements.shift();
+            }
+        };
+        
+        const trackKey = () => {
+            instanceState.keystrokes.push(Date.now());
+            if (instanceState.keystrokes.length > 20) {
+                instanceState.keystrokes.shift();
+            }
+        };
+        
+        input.addEventListener('mousemove', trackMouse);
+        canvas.addEventListener('mousemove', trackMouse);
+        input.addEventListener('keydown', trackKey);
+    }
+
     function verifyCaptcha(instanceState) {
-        const { input, status } = instanceState;
+        const { input } = instanceState;
         const userInput = input.value.trim();
 
         if (!instanceState.currentCode) {
-            showStatus(instanceState, 'CAPTCHA not properly initialized. Please refresh.', 'error');
+            showStatus(instanceState, 'Challenge expired. Please refresh.', 'error');
             return;
         }
 
         if (Date.now() - instanceState.startTime > CONFIG.challengeTimeout) {
-            showStatus(instanceState, 'CAPTCHA has expired. Please refresh.', 'error');
+            showStatus(instanceState, 'Time limit exceeded. Please refresh.', 'error');
             resetCaptcha(instanceState.id);
+            return;
+        }
+
+        const interactionTime = instanceState.firstInteractionTime ? 
+            Date.now() - instanceState.firstInteractionTime : 0;
+        
+        if (interactionTime < CONFIG.minInteractionTime) {
+            showStatus(instanceState, 'Please take your time to solve the challenge.', 'error');
             return;
         }
 
@@ -413,10 +462,11 @@
         const normalizedInput = userInput.replace(/\s/g, '').toUpperCase();
         const normalizedCode = instanceState.currentCode;
 
-        if (normalizedInput === normalizedCode) {
-            // Success
+        const isBotLike = analyzeBehavior(instanceState);
+        
+        if (normalizedInput === normalizedCode && !isBotLike) {
             instanceState.verified = true;
-            showStatus(instanceState, '✓ Verification successful! You may now submit the form.', 'success');
+            showStatus(instanceState, '✓ Verification successful!', 'success');
             
             input.disabled = true;
             instanceState.verifyBtn.disabled = true;
@@ -428,28 +478,25 @@
             addTokenToForm(instanceState);
             
         } else {
-            // Failure - show detailed error message
             const remaining = CONFIG.maxAttempts - instanceState.attempts;
             
             if (remaining > 0) {
-                showStatus(instanceState, `✗ Verification failed. ${remaining} attempt${remaining !== 1 ? 's' : ''} remaining.`, 'error');
+                showStatus(instanceState, `✗ Incorrect. ${remaining} attempt${remaining !== 1 ? 's' : ''} left.`, 'error');
             } else {
-                showStatus(instanceState, '✗ Maximum attempts exceeded. Please refresh CAPTCHA.', 'error');
+                showStatus(instanceState, '✗ Too many attempts. Please refresh.', 'error');
             }
             
             input.value = '';
             input.focus();
             input.style.borderColor = CONFIG.colors.error;
             
-            // Reset border color after 2 seconds
             setTimeout(() => {
                 if (!instanceState.verified) {
                     input.style.borderColor = CONFIG.colors.border;
                 }
             }, 2000);
             
-            // Generate new CAPTCHA after failure
-            generateTextCaptcha(instanceState);
+            generateChallenge(instanceState);
             
             if (instanceState.attempts >= CONFIG.maxAttempts) {
                 input.disabled = true;
@@ -460,21 +507,30 @@
         }
     }
 
+    function analyzeBehavior(instanceState) {
+        if (instanceState.mouseMovements.length < 3) return true;
+        if (instanceState.keystrokes.length < 2) return true;
+        
+        if (instanceState.keystrokes.length >= 3) {
+            const intervals = [];
+            for (let i = 1; i < instanceState.keystrokes.length; i++) {
+                intervals.push(instanceState.keystrokes[i] - instanceState.keystrokes[i-1]);
+            }
+            const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+            const variance = intervals.reduce((sum, val) => sum + Math.pow(val - avgInterval, 2), 0) / intervals.length;
+            
+            if (variance < 10 && avgInterval < 100) return true;
+        }
+        
+        return false;
+    }
+
     function showStatus(instanceState, message, type) {
         const { status } = instanceState;
         status.textContent = message;
         status.style.color = type === 'success' ? CONFIG.colors.success : 
                             type === 'error' ? CONFIG.colors.error : 
                             CONFIG.colors.lightText;
-        
-        // Add appropriate icon based on type
-        if (type === 'success') {
-            status.innerHTML = '✓ ' + message;
-        } else if (type === 'error') {
-            status.innerHTML = '✗ ' + message;
-        } else {
-            status.innerHTML = message;
-        }
     }
 
     function resetCaptcha(instanceId) {
@@ -484,6 +540,9 @@
             instanceState.verified = false;
             instanceState.currentToken = generateToken();
             instanceState.startTime = Date.now();
+            instanceState.firstInteractionTime = null;
+            instanceState.mouseMovements = [];
+            instanceState.keystrokes = [];
             
             instanceState.input.disabled = false;
             instanceState.verifyBtn.disabled = false;
@@ -494,7 +553,7 @@
             instanceState.input.value = '';
             
             removeTokenFromForm(instanceState);
-            generateTextCaptcha(instanceState);
+            generateChallenge(instanceState);
         }
     }
 
@@ -534,7 +593,7 @@
                             const instanceId = firstCaptcha.id;
                             const instanceState = captchaInstances.get(instanceId);
                             if (instanceState) {
-                                showStatus(instanceState, '✗ Please complete the CAPTCHA verification before submitting.', 'error');
+                                showStatus(instanceState, '✗ Complete CAPTCHA before submitting.', 'error');
                                 instanceState.input.focus();
                             }
                         }
@@ -573,6 +632,15 @@
         captchaInstances.forEach((instanceState, instanceId) => {
             resetCaptcha(instanceId);
         });
+    };
+
+    global.xsukaxCAPTCHA.getInstance = function(id) {
+        return captchaInstances.get(id);
+    };
+
+    global.xsukaxCAPTCHA.isVerified = function(id) {
+        const instance = captchaInstances.get(id);
+        return instance ? instance.verified : false;
     };
 
 })(typeof window !== 'undefined' ? window : this);
