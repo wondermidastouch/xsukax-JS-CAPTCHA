@@ -307,7 +307,7 @@
         drawTextWithEffects(ctx, instanceState.currentCode, width, height);
         addNoise(ctx, width, height);
         
-        status.textContent = 'Please enter the uppercase characters shown in the image above';
+        status.textContent = 'Please enter the characters shown in the image';
         status.style.color = CONFIG.colors.lightText;
     }
 
