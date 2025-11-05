@@ -1,7 +1,7 @@
 /**
  * xsukax CAPTCHA v2.0
  * Enhanced secure CAPTCHA with advanced bot protection
- * Usage: <script src="captcha.js"></script>
+ * Usage: <script src="xsukax-captcha.js"></script>
  *        <div class="xsukax-captcha"></div>
  */
 
@@ -114,9 +114,11 @@
             padding: 16px;
             background: ${CONFIG.colors.background};
             font-family: ${CONFIG.fonts[0]}, sans-serif;
-            max-width: ${CONFIG.canvasWidth + 32}px;
+            max-width: 100%;
+            width: 100%;
             margin: 12px 0;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-sizing: border-box;
         `;
         return wrapper;
     }
@@ -146,6 +148,7 @@
             align-items: center;
             justify-content: center;
             transition: all 0.2s;
+            flex-shrink: 0;
         `;
         refreshBtn.onmouseenter = function() {
             this.style.background = CONFIG.colors.primary;
@@ -164,7 +167,13 @@
 
     function createCanvasContainer(instanceState) {
         const container = document.createElement('div');
-        container.style.cssText = 'margin-bottom: 12px; position: relative; user-select: none;';
+        container.style.cssText = `
+            margin-bottom: 12px;
+            position: relative;
+            user-select: none;
+            width: 100%;
+            overflow: hidden;
+        `;
         
         const canvas = document.createElement('canvas');
         canvas.width = CONFIG.canvasWidth;
@@ -177,6 +186,7 @@
             cursor: pointer;
             width: 100%;
             height: auto;
+            max-width: 100%;
             touch-action: manipulation;
         `;
         canvas.onclick = () => resetCaptcha(instanceState.id);
@@ -187,7 +197,14 @@
 
     function createInputGroup(instanceState) {
         const group = document.createElement('div');
-        group.style.cssText = 'display: flex; gap: 8px; margin-bottom: 12px; align-items: stretch;';
+        group.style.cssText = `
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            align-items: stretch;
+            width: 100%;
+            box-sizing: border-box;
+        `;
         
         const input = document.createElement('input');
         input.type = 'text';
@@ -195,8 +212,10 @@
         input.autocomplete = 'off';
         input.spellcheck = false;
         input.inputMode = 'text';
+        input.maxLength = CONFIG.codeLength;
         input.style.cssText = `
             flex: 1;
+            min-width: 0;
             padding: 10px 12px;
             border: 1px solid ${CONFIG.colors.border};
             border-radius: 4px;
@@ -204,6 +223,7 @@
             font-size: ${isMobile ? '16px' : '14px'};
             transition: border-color 0.2s;
             text-transform: uppercase;
+            box-sizing: border-box;
         `;
         
         input.oninput = function() {
@@ -231,14 +251,16 @@
             color: white;
             border: none;
             border-radius: 4px;
-            padding: 0 20px;
+            padding: 10px 16px;
             cursor: pointer;
             font-family: ${CONFIG.fonts[0]}, sans-serif;
             font-size: ${isMobile ? '16px' : '14px'};
             font-weight: 500;
             transition: background-color 0.2s;
-            min-width: 90px;
+            white-space: nowrap;
+            flex-shrink: 0;
             touch-action: manipulation;
+            box-sizing: border-box;
         `;
         verifyBtn.onmouseenter = function() {
             if (!this.disabled) this.style.background = '#1a2530';
@@ -256,7 +278,13 @@
     function createStatus() {
         const status = document.createElement('div');
         status.className = 'xsukax-captcha-status';
-        status.style.cssText = 'min-height: 18px; margin-bottom: 8px; font-size: 13px; line-height: 1.4;';
+        status.style.cssText = `
+            min-height: 18px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            line-height: 1.4;
+            word-wrap: break-word;
+        `;
         return status;
     }
 
